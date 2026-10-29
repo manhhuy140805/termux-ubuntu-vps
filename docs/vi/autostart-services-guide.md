@@ -142,6 +142,48 @@ chmod +x ~/.termux/boot/start-server.sh
 
 ---
 
+### 3.4. Phương án thay thế: Tự động chạy toàn bộ dịch vụ khi mở App Termux thủ công (`~/.bashrc`)
+
+Nếu bạn không muốn phụ thuộc vào app `Termux:Boot` mà muốn **chỉ cần chạm mở app Termux trên điện thoại là toàn bộ hệ thống VPS tự động bật lên**:
+
+Thêm đoạn script sau vào file `~/.bashrc` trên Termux (ngoài môi trường Ubuntu):
+
+```bash
+cat << 'EOF' >> ~/.bashrc
+
+# ==============================================================================
+# Auto-start VPS Services when opening Termux manually
+# ==============================================================================
+if ! pgrep -x sshd > /dev/null 2>&1; then
+    echo "=============================================="
+    echo "🚀 Đang khởi động toàn bộ dịch vụ VPS..."
+    echo "=============================================="
+    termux-wake-lock
+    sshd
+    echo "✅ [Termux] SSH (Port 8022): OK"
+
+    if ! pg_isready -q > /dev/null 2>&1; then
+        pg_ctl -D $PREFIX/var/lib/postgresql -l $PREFIX/var/lib/postgresql/logfile start > /dev/null 2>&1
+        echo "✅ [Termux] PostgreSQL (Port 5432): OK"
+    fi
+
+    echo "⏳ [Ubuntu] Đang bật SSH 2222, Redis, PM2, Cloudflare Tunnel..."
+    proot-distro login ubuntu --user deploy -- bash -l -c "/home/deploy/scripts/start-services.sh"
+    echo "=============================================="
+    echo "🎉 Toàn bộ dịch vụ VPS đã sẵn sàng!"
+    echo "=============================================="
+fi
+alias vps="proot-distro login ubuntu --user deploy"
+EOF
+```
+
+*Cơ chế hoạt động*:
+* Lần đầu bạn mở Termux sau khi bật máy: Do `sshd` chưa chạy, script sẽ tự động kích hoạt CPU Wake-lock, Postgres, và toàn bộ dịch vụ trong Ubuntu.
+* Khi bạn mở thêm tab/phiên mới: Do `sshd` đã chạy, Termux sẽ bỏ qua và mở dấu nhắc lệnh ngay lập tức mà không chạy lại dịch vụ.
+* Gõ `vps` để đăng nhập nhanh vào tài khoản `deploy` trong Ubuntu PRoot bất cứ lúc nào.
+
+---
+
 ## 4. Tầng 2: Cấu hình Script điều phối dịch vụ trong Ubuntu (`start-services.sh`)
 
 Đăng nhập vào Ubuntu (`proot-distro login ubuntu --user deploy` hoặc SSH cổng `2222`):

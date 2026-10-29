@@ -142,6 +142,48 @@ chmod +x ~/.termux/boot/start-server.sh
 
 ---
 
+### 3.4. Alternative: Auto-start Services on Manual Termux App Launch (`~/.bashrc`)
+
+If you prefer not to rely on the `Termux:Boot` app and instead want **all VPS services to automatically initialize as soon as you tap open Termux**:
+
+Append the following snippet to `~/.bashrc` in Termux (host environment, outside Ubuntu):
+
+```bash
+cat << 'EOF' >> ~/.bashrc
+
+# ==============================================================================
+# Auto-start VPS Services when opening Termux manually
+# ==============================================================================
+if ! pgrep -x sshd > /dev/null 2>&1; then
+    echo "=============================================="
+    echo "🚀 Initializing VPS Services..."
+    echo "=============================================="
+    termux-wake-lock
+    sshd
+    echo "✅ [Termux] SSH (Port 8022): OK"
+
+    if ! pg_isready -q > /dev/null 2>&1; then
+        pg_ctl -D $PREFIX/var/lib/postgresql -l $PREFIX/var/lib/postgresql/logfile start > /dev/null 2>&1
+        echo "✅ [Termux] PostgreSQL (Port 5432): OK"
+    fi
+
+    echo "⏳ [Ubuntu] Launching SSH 2222, Redis, PM2, Cloudflare Tunnel..."
+    proot-distro login ubuntu --user deploy -- bash -l -c "/home/deploy/scripts/start-services.sh"
+    echo "=============================================="
+    echo "🎉 All VPS Services are ready!"
+    echo "=============================================="
+fi
+alias vps="proot-distro login ubuntu --user deploy"
+EOF
+```
+
+*How it works*:
+* On first launch after reboot: Since `sshd` is not running, the script engages the CPU Wake-lock, starts PostgreSQL, and invokes Ubuntu services (SSH, Redis, PM2, Cloudflare).
+* On subsequent tabs/sessions: Since `sshd` is already running, Termux skips re-execution and drops directly to the shell prompt without delay.
+* Type `vps` anytime to quickly log in to Ubuntu PRoot as the `deploy` user.
+
+---
+
 ## 4. Layer 2: Ubuntu PRoot Unified Service Manager (`start-services.sh`)
 
 Log in to Ubuntu (`proot-distro login ubuntu --user deploy` or SSH into port `2222`):
