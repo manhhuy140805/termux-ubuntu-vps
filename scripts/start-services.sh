@@ -5,6 +5,11 @@
 # Usage: ./start-services.sh [start|stop|restart|status]
 # ==============================================================================
 
+# Ensure full PATH including /usr/local/bin for node & pm2
+export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+export HOME="/home/deploy"
+export PM2_HOME="$HOME/.pm2"
+
 LOG_DIR="$HOME/logs"
 mkdir -p "$LOG_DIR"
 
@@ -29,12 +34,24 @@ start_services() {
         echo "[Redis] Redis server is already running."
     fi
 
-    # 3. Restore PM2 Applications (Node.js / Python Backend)
+    # 3. Clean stale PM2 socket & restore applications
+    rm -f "$PM2_HOME/pm2.sock" "$PM2_HOME/pm2.pid"
     if command -v pm2 > /dev/null 2>&1; then
         echo "[PM2] Resurrecting saved applications..."
         pm2 resurrect > /dev/null 2>&1 || true
         pm2 restart all > /dev/null 2>&1 || true
-        echo "[PM2] Applications restored and online."
+
+        # Fallback check for intern-be
+        if [ -d "$HOME/projects/project-intern-be" ]; then
+            cd "$HOME/projects/project-intern-be"
+            if ! pm2 list | grep -q "intern-be.*online"; then
+                echo "[PM2] intern-be is not online. Forcing start..."
+                pm2 restart intern-be > /dev/null 2>&1 || pm2 start dist/main.js --name "intern-be" --max-memory-restart 300M
+            fi
+        fi
+        echo "[PM2] Applications status confirmed."
+    else
+        echo "[PM2] ERROR: pm2 binary not found in PATH: $PATH"
     fi
 
     # 4. Start Cloudflare Tunnel
