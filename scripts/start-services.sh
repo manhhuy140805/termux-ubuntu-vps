@@ -33,7 +33,8 @@ start_services() {
     if command -v pm2 > /dev/null 2>&1; then
         echo "[PM2] Resurrecting saved applications..."
         pm2 resurrect > /dev/null 2>&1 || true
-        echo "[PM2] Applications restored."
+        pm2 restart all > /dev/null 2>&1 || true
+        echo "[PM2] Applications restored and online."
     fi
 
     # 4. Start Cloudflare Tunnel
