@@ -590,6 +590,9 @@ chmod +x ~/scripts/start-services.sh
 
 ### Bước 8: Quản lý tiến trình, xem Log và Script tự động
 
+> [!TIP]
+> 📖 Để tra cứu nhanh toàn bộ các lệnh thường dùng (PM2 Fork mode, ping port, đọc log, kiểm tra PostgreSQL, Redis và Cloudflare), vui lòng xem: [Sổ Tay Lệnh DevOps Thường Dùng Trên Android VPS](docs/vi/useful-commands-cheatsheet.md).
+
 Sử dụng script đi kèm dự án [`scripts/start-services.sh`](scripts/start-services.sh) hoặc lệnh trực tiếp:
 
 ```bash
@@ -621,6 +624,7 @@ Mỗi khi bạn gõ `git push origin main` trên máy tính, GitHub Actions sẽ
 4. Khởi động lại ứng dụng qua **PM2** mà không gây gián đoạn (Zero-downtime).
 
 📖 **Các tài liệu chuyên sâu dành cho nhà phát triển:**
+* 👉 [**Sổ Tay Lệnh DevOps Thường Dùng Trên Android VPS (Cheatsheet)**](docs/vi/useful-commands-cheatsheet.md) *(Bản tiếng Anh: [English Version](docs/en/useful-commands-cheatsheet.md))*
 * 👉 [**Hướng Dẫn Tự Khởi Động Dịch Vụ Khi Điện Thoại Reboot (Cold Boot)**](docs/vi/autostart-services-guide.md) *(Bản tiếng Anh: [English Version](docs/en/autostart-services-guide.md))*
 * 👉 [**Hướng Dẫn Cài Đặt & Kết Nối SSH Đến Termux Host (Cổng 8022)**](docs/vi/termux-ssh-guide.md) *(Bản tiếng Anh: [English Version](docs/en/termux-ssh-guide.md))*
 * 👉 [**Hướng Dẫn Chi Tiết CI/CD GitHub Actions & Tailscale Cho Android VPS**](docs/vi/cicd-github-actions.md) *(Bản tiếng Anh: [English Version](docs/en/cicd-github-actions.md))*

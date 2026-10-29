@@ -501,6 +501,9 @@ chmod +x ~/scripts/start-services.sh
 
 ### Step 8: Process Monitoring & Useful Commands
 
+> [!TIP]
+> 📖 For an extensive cheatsheet of commands covering PM2, port inspection, logs, PostgreSQL, Redis, and Cloudflare, refer to: [Essential DevOps Commands Cheatsheet](docs/en/useful-commands-cheatsheet.md).
+
 Use the [`scripts/start-services.sh`](scripts/start-services.sh) management script:
 
 ```bash
@@ -529,6 +532,7 @@ Every time you run `git push origin main`, GitHub Actions will:
 4. Reload the backend application via **PM2** with zero downtime.
 
 📖 **Deep-Dive Developer Guides:**
+* 👉 [**Essential DevOps Commands Cheatsheet**](docs/en/useful-commands-cheatsheet.md) *(Vietnamese: [Bản tiếng Việt](docs/vi/useful-commands-cheatsheet.md))*
 * 👉 [**Complete Autostart & Disaster Recovery Guide (Cold Reboot)**](docs/en/autostart-services-guide.md) *(Vietnamese: [Bản tiếng Việt](docs/vi/autostart-services-guide.md))*
 * 👉 [**Installing & Connecting SSH to Termux Host (Port 8022)**](docs/en/termux-ssh-guide.md) *(Vietnamese: [Bản tiếng Việt](docs/vi/termux-ssh-guide.md))*
 * 👉 [**Automated CI/CD Pipeline with GitHub Actions & Tailscale**](docs/en/cicd-github-actions.md) *(Vietnamese: [Bản tiếng Việt](docs/vi/cicd-github-actions.md))*
