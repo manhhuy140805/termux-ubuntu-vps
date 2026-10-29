@@ -1,0 +1,26 @@
+# Logs
+logs/
+*.log
+
+# Sensitive credentials & tokens
+*.token
+token
+.cloudflared/token
+.env
+.env.*
+
+# SSH keys
+id_rsa*
+*.pem
+*.key
+
+# Node / JS dependencies
+node_modules/
+dist/
+.npm/
+
+# Temporary / OS files
+.DS_Store
+*.swp
+*~
+.termux/boot/*.tmp

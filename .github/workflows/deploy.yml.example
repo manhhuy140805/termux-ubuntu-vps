@@ -1,0 +1,70 @@
+# ==============================================================================
+# GitHub Actions Workflow: Automated Deployment & Migration via Tailscale
+# Location: .github/workflows/deploy.yml in your application repository
+# Cost: 0 VND (Uses free GitHub Actions minutes + free Tailscale Personal tier)
+# ==============================================================================
+
+name: CI/CD Pipeline to Android VPS
+
+on:
+  push:
+    branches:
+      - main  # Triggered automatically on push to main branch
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  deploy:
+    name: Build, Migrate & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # Step 1: Checkout the latest source code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Connect GitHub Actions VM to your private Tailscale Tailnet
+      - name: Connect to Tailscale Network
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      # Step 3: Connect via SSH to Android VPS, pull updates, migrate DB & reload PM2
+      - name: Deploy to Android VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          timeout: 120s
+          command_timeout: 10m
+          script: |
+            set -e # Exit immediately on error
+            echo "🚀 [CI/CD] Connected to Android VPS via Tailscale!"
+            
+            # Navigate to project directory
+            cd ~/projects/my-app
+
+            # 1. Pull the latest code
+            echo "📥 [1/4] Pulling latest commits..."
+            git pull origin main
+
+            # 2. Install dependencies
+            echo "📦 [2/4] Installing dependencies..."
+            npm install --production=false
+
+            # 3. Run database migrations (Prisma example)
+            echo "🐘 [3/4] Running database migrations..."
+            npx prisma migrate deploy
+
+            # 4. Build application (TypeScript / Next.js if applicable)
+            echo "⚙️ [4/4] Building application..."
+            npm run build --if-present
+
+            # 5. Reload PM2 process with zero downtime
+            echo "🔄 Reloading PM2 runner..."
+            pm2 reload my-app || pm2 start dist/main.js --name "my-app"
+            pm2 save
+
+            echo "✅ [CI/CD] Deployment completed successfully! Live on Cloudflare Tunnel."
